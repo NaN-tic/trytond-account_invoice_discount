@@ -82,7 +82,9 @@ class InvoiceLine:
     def on_change_product(self):
         super(InvoiceLine, self).on_change_product()
         if self.unit_price:
-            self.gross_unit_price = self.unit_price
+            self.gross_unit_price = self.unit_price \
+                if self.invoice_type == 'out' or \
+                (self.invoice and self.invoice.type == 'out') else None
             self.discount = Decimal(0)
             self.update_prices()
         if not self.discount:
