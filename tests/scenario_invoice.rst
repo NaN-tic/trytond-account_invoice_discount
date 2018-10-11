@@ -146,8 +146,17 @@ after set the Discount the Unit Price is recomputed to 0.::
     >>> line.unit_price = Decimal('20.00000000')
     >>> line.gross_unit_price = Decimal('25.153')
     >>> line.discount = Decimal('1.0')
-    >>> line.unit_price
-    Decimal('0E-8')
+    >>> line.unit_price == Decimal(0)
+    True
+    >>> invoice.save()
+    >>> line = invoice.lines.pop()
+    >>> invoice.lines.append(line)
+    >>> line.gross_unit_price
+    Decimal('25.153')
+    >>> line.discount
+    Decimal('1.0')
+    >>> line.unit_price == Decimal(0)
+    True
 
 Check invoice totals::
 
