@@ -96,14 +96,21 @@ class InvoiceLine:
         for vals in vlist:
             if vals.get('type') != 'line':
                 continue
-            gross_unit_price = (vals.get('unit_price', Decimal('0.0'))
-                or Decimal('0.0'))
-            if vals.get('discount') not in (None, 1):
-                gross_unit_price = gross_unit_price / (1 - vals['discount'])
-            digits = cls.gross_unit_price.digits[1]
-            gross_unit_price = gross_unit_price.quantize(
-                Decimal(str(10.0 ** -digits)))
-            vals['gross_unit_price'] = gross_unit_price
+
+            if vals.get('unit_price') is None:
+                vals['gross_unit_price'] = Decimal(0)
+                continue
+
+            if 'gross_unit_price' not in vals:
+                gross_unit_price = vals.get('unit_price', Decimal('0.0'))
+                if vals.get('discount') not in (None, 1):
+                    gross_unit_price = gross_unit_price / (1 - vals['discount'])
+                if gross_unit_price != vals['unit_price']:
+                    digits = cls.gross_unit_price.digits[1]
+                    gross_unit_price = gross_unit_price.quantize(
+                        Decimal(str(10.0 ** -digits)))
+                vals['gross_unit_price'] = gross_unit_price
+
             if not vals.get('discount'):
                 vals['discount'] = Decimal(0)
         return super(InvoiceLine, cls).create(vlist)
