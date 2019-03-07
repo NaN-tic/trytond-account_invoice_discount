@@ -10,6 +10,7 @@ Imports::
     >>> from operator import attrgetter
     >>> from proteus import Model, Wizard
     >>> from trytond.tests.tools import activate_modules
+    >>> from trytond.modules.product import price_digits
     >>> from trytond.modules.company.tests.tools import create_company, \
     ...     get_company
     >>> from trytond.modules.account.tests.tools import create_fiscalyear, \
@@ -130,8 +131,10 @@ after set the Discount the Unit Price is recomputed to 0.::
     >>> invoice.save()
     >>> line = invoice.lines.pop()
     >>> invoice.lines.append(line)
+    >>> abs(line.gross_unit_price.as_tuple().exponent) == price_digits[1]
+    True
     >>> line.gross_unit_price
-    Decimal('25.153')
+    Decimal('25.1530')
     >>> line.discount
     Decimal('1.0')
     >>> line.unit_price == Decimal(0)
