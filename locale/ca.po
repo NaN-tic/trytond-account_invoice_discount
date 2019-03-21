@@ -21,3 +21,7 @@ msgstr "Descompte"
 msgctxt "view:account.invoice.line:"
 msgid "%"
 msgstr "%"
+
+msgctxt "model:ir.action,name:report_invoice"
+msgid "Invoice"
+msgstr "Factura"
