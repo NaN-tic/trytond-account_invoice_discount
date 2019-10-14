@@ -102,7 +102,7 @@ class InvoiceLine:
                 vals['gross_unit_price'] = Decimal(0)
                 continue
 
-            if 'gross_unit_price' not in vals:
+            if vals.get('gross_unit_price', None) == None:
                 gross_unit_price = vals.get('unit_price', Decimal('0.0'))
                 if vals.get('discount') not in (None, 1):
                     gross_unit_price = gross_unit_price / (1 - vals['discount'])
