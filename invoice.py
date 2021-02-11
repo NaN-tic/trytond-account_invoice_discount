@@ -98,7 +98,6 @@ class InvoiceLine(metaclass=PoolMeta):
         except:
             pass
         if self.unit_price:
-            self.gross_unit_price = self.unit_price
             self.update_prices()
 
     @classmethod
