@@ -8,7 +8,7 @@ import io
 from configparser import ConfigParser
 
 MODULE = 'account_invoice_discount'
-PREFIX = 'trytonspain'
+PREFIX = 'nan-tic'
 MODULE2PREFIX = {}
 
 
