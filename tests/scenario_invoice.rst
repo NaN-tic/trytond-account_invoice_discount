@@ -106,8 +106,8 @@ Add line defining Gross Unit Price and Discount (Unit Price is calculated)::
     >>> line.quantity = 1
     >>> line.discount = Decimal('0.2577')
     >>> line.gross_unit_price = Decimal('25.153')
-    >>> line.unit_price
-    Decimal('18.67107190')
+    >>> line.unit_price == Decimal('18.6711')
+    True
     >>> line.amount
     Decimal('18.67')
 
@@ -177,7 +177,7 @@ Post invoice and check again invoice totals and taxes::
     >>> account_tax.reload()
     >>> (account_tax.debit, account_tax.credit)
     (Decimal('0.00'), Decimal('8.80'))
-    
+
 Discounts are copied when crediting the invoice::
 
     >>> credit = Wizard('account.invoice.credit', [invoice])
