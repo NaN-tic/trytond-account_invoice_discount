@@ -42,7 +42,6 @@ class InvoiceLine(metaclass=PoolMeta):
     @fields.depends('gross_unit_price', 'discount', 'unit_price')
     def update_prices(self):
         unit_price = self.unit_price
-        digits = self.__class__.gross_unit_price.digits[1]
         gross_unit_price = gross_unit_price_wo_round = self.gross_unit_price
 
         if self.gross_unit_price is not None and self.discount is not None:
