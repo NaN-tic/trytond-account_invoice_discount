@@ -5,9 +5,8 @@ from trytond.model import fields
 from trytond.pool import PoolMeta
 from trytond.pyson import Eval
 from trytond.config import config as config_
+from trytond.modules.currency.fields import Monetary
 from trytond.modules.product import price_digits, round_price
-
-__all__ = ['InvoiceLine', 'discount_digits']
 
 STATES = {
     'invisible': Eval('type') != 'line',
@@ -22,24 +21,25 @@ discount_digits = (16, config_.getint('product', 'discount_decimal',
 class InvoiceLine(metaclass=PoolMeta):
     __name__ = 'account.invoice.line'
 
-    gross_unit_price = fields.Numeric('Gross Price', digits=price_digits,
-        states=STATES, depends=DEPENDS)
-    gross_unit_price_wo_round = fields.Numeric('Gross Price without rounding',
-        digits=(16, price_digits[1] + discount_digits[1]), readonly=True)
+    gross_unit_price = Monetary('Gross Price', digits=price_digits,
+        currency='currency', states=STATES, depends=DEPENDS)
+    gross_unit_price_wo_round = Monetary('Gross Price without rounding',
+        digits=(16, price_digits[1] + discount_digits[1]), currency='currency',
+        readonly=True)
     discount = fields.Numeric('Discount', digits=discount_digits,
         states=STATES, depends=DEPENDS)
 
     @classmethod
     def __setup__(cls):
-        super(InvoiceLine, cls).__setup__()
+        super().__setup__()
         cls.unit_price.states['readonly'] = True
-        cls.unit_price.digits = (20, price_digits[1] + discount_digits[1])
 
     @classmethod
     def default_discount(cls):
         return Decimal(0)
 
-    @fields.depends('gross_unit_price', 'discount', 'unit_price')
+    @fields.depends('gross_unit_price', 'unit_price', 'discount',
+        methods=['on_change_with_amount'])
     def update_prices(self):
         unit_price = self.unit_price
         gross_unit_price = gross_unit_price_wo_round = self.gross_unit_price
@@ -50,48 +50,55 @@ class InvoiceLine(metaclass=PoolMeta):
 
             if self.discount != 1:
                 gross_unit_price_wo_round = unit_price / (1 - self.discount)
-            gross_unit_price = round_price(gross_unit_price_wo_round)
         elif self.unit_price and self.discount:
             gross_unit_price_wo_round = self.unit_price / (1 - self.discount)
             gross_unit_price = round_price(gross_unit_price_wo_round)
 
         if gross_unit_price_wo_round:
-            gross_unit_price_wo_round = round_price(gross_unit_price_wo_round)
+            gup_wo_r_digits = self.__class__.gross_unit_price_wo_round.digits[1]
+            gross_unit_price_wo_round = gross_unit_price_wo_round.quantize(
+                Decimal(str(10.0 ** -gup_wo_r_digits)))
+            gross_unit_price = round_price(gross_unit_price_wo_round)
 
         self.gross_unit_price = gross_unit_price
         self.gross_unit_price_wo_round = gross_unit_price_wo_round
         self.unit_price = unit_price
+        self.amount = self.on_change_with_amount()
 
     @fields.depends(methods=['update_prices'])
     def on_change_gross_unit_price(self):
         self.update_prices()
 
+    @fields.depends('unit_price', methods=['update_prices'])
+    def on_change_unit_price(self):
+        # unit_price has readonly state but could set unit_price from source code
+        if self.unit_price is not None:
+            self.update_prices()
+
     @fields.depends(methods=['update_prices'])
     def on_change_discount(self):
         self.update_prices()
 
-    @fields.depends('discount', 'gross_unit_price')
-    def on_change_with_amount(self):
-        return super(InvoiceLine, self).on_change_with_amount()
-
-    @fields.depends('unit_price', 'gross_unit_price', 'discount',
-        methods=['update_prices'])
+    @fields.depends('unit_price', 'discount', methods=['update_prices'])
     def on_change_product(self):
-        super(InvoiceLine, self).on_change_product()
-        if self.unit_price:
-            self.gross_unit_price = self.unit_price
-            self.discount = Decimal(0)
-            self.update_prices()
+        super().on_change_product()
+        self.gross_unit_price = self.unit_price
         if not self.discount:
             self.discount = Decimal(0)
 
-    @fields.depends('unit_price', 'gross_unit_price', methods=['update_prices'])
+        if self.unit_price is not None:
+            self.update_prices()
+
+    @fields.depends('unit_price', 'discount', methods=['update_prices'])
     def on_change_quantity(self):
         try:
-            super(InvoiceLine, self).on_change_quantity()
+            super().on_change_quantity()
         except:
             pass
-        if self.unit_price:
+        self.gross_unit_price = self.unit_price
+        if not self.discount:
+            self.discount = Decimal(0)
+        if self.unit_price is not None:
             self.update_prices()
 
     @classmethod
@@ -115,7 +122,7 @@ class InvoiceLine(metaclass=PoolMeta):
 
             if not vals.get('discount'):
                 vals['discount'] = Decimal(0)
-        return super(InvoiceLine, cls).create(vlist)
+        return super().create(vlist)
 
     def _credit(self):
         line = super(InvoiceLine, self)._credit()
