@@ -14,6 +14,9 @@ STATES = {
     'readonly': Eval('invoice_state') != 'draft',
     }
 DEPENDS = ['type', 'invoice_state']
+
+gross_unit_price_digits = (16, config_.getint('product', 'gross_unit_price_decimal',
+    default=price_digits[1]))
 discount_digits = (16, config_.getint('product', 'discount_decimal',
     default=4))
 
@@ -21,11 +24,8 @@ discount_digits = (16, config_.getint('product', 'discount_decimal',
 class InvoiceLine(metaclass=PoolMeta):
     __name__ = 'account.invoice.line'
 
-    gross_unit_price = Monetary('Gross Price', digits=price_digits,
+    gross_unit_price = Monetary('Gross Price', digits=gross_unit_price_digits,
         currency='currency', states=STATES, depends=DEPENDS)
-    gross_unit_price_wo_round = Monetary('Gross Price without rounding',
-        digits=(16, price_digits[1] + discount_digits[1]), currency='currency',
-        readonly=True)
     discount = fields.Numeric('Discount', digits=discount_digits,
         states=STATES, depends=DEPENDS)
 
@@ -42,26 +42,23 @@ class InvoiceLine(metaclass=PoolMeta):
         methods=['on_change_with_amount'])
     def update_prices(self):
         unit_price = self.unit_price
-        gross_unit_price = gross_unit_price_wo_round = self.gross_unit_price
+        gross_unit_price = self.gross_unit_price
 
         if self.gross_unit_price is not None and self.discount is not None:
             unit_price = self.gross_unit_price * (1 - self.discount)
             unit_price = round_price(unit_price)
 
             if self.discount != 1:
-                gross_unit_price_wo_round = unit_price / (1 - self.discount)
+                gross_unit_price = unit_price / (1 - self.discount)
         elif self.unit_price and self.discount:
-            gross_unit_price_wo_round = self.unit_price / (1 - self.discount)
-            gross_unit_price = round_price(gross_unit_price_wo_round)
+            gross_unit_price = self.unit_price / (1 - self.discount)
 
-        if gross_unit_price_wo_round:
-            gup_wo_r_digits = self.__class__.gross_unit_price_wo_round.digits[1]
-            gross_unit_price_wo_round = gross_unit_price_wo_round.quantize(
-                Decimal(str(10.0 ** -gup_wo_r_digits)))
-            gross_unit_price = round_price(gross_unit_price_wo_round)
+        if gross_unit_price:
+            gup_digits = self.__class__.gross_unit_price.digits[1]
+            gross_unit_price = gross_unit_price.quantize(
+                Decimal(str(10.0 ** -gup_digits)))
 
         self.gross_unit_price = gross_unit_price
-        self.gross_unit_price_wo_round = gross_unit_price_wo_round
         self.unit_price = unit_price
         self.amount = self.on_change_with_amount()
 
