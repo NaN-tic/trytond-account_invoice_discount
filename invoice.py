@@ -13,7 +13,6 @@ STATES = {
     'required': Eval('type') == 'line',
     'readonly': Eval('invoice_state') != 'draft',
     }
-DEPENDS = ['type', 'invoice_state']
 
 gross_unit_price_digits = (16, config_.getint('product', 'gross_unit_price_decimal',
     default=price_digits[1]))
@@ -25,9 +24,9 @@ class InvoiceLine(metaclass=PoolMeta):
     __name__ = 'account.invoice.line'
 
     gross_unit_price = Monetary('Gross Price', digits=gross_unit_price_digits,
-        currency='currency', states=STATES, depends=DEPENDS)
+        currency='currency', states=STATES)
     discount = fields.Numeric('Discount', digits=discount_digits,
-        states=STATES, depends=DEPENDS)
+        states=STATES)
 
     @classmethod
     def __setup__(cls):
