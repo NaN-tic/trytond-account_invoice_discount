@@ -3,10 +3,11 @@
 The COPYRIGHT file at the top level of this repository contains the full
 copyright notices and license terms. -->
 <data>
-    <xpath expr="/tree/field[@name='unit_price']" position="before">
-        <field name="gross_unit_price" optional="0"/>
-        <field name="discount" factor="100" optional="0">
-            <suffix name="discount" string="%"/>
+    <xpath expr="//field[@name='unit_price']" position="before">
+        <field name="base_price" optional="1"/>
+        <field name="discount_rate" factor="100" optional="1">
+            <suffix name="discount_rate" string="%"/>
         </field>
+        <field name="discount_amount" optional="1"/>
     </xpath>
 </data>
