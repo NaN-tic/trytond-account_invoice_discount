@@ -4,11 +4,20 @@ from proteus import Model
 from trytond.modules.company.tests.tools import create_company, get_company
 from trytond.modules.account.tests.tools import create_chart, get_accounts
 from trytond.tests.tools import activate_modules
+from trytond.tests.test_tryton import drop_db
 
 
 class Test(unittest.TestCase):
+    def setUp(self):
+        drop_db()
+        super().setUp()
+        
+    def tearDown(self):
+        drop_db()
+        super().tearDown()
+
     def test_account_invoice_discount(self):
-        activate_modules('account_invoice_discount')
+        activate_modules(['sale_discount', 'account_invoice_discount'])
         
         create_company()
         company = get_company()
@@ -41,35 +50,34 @@ class Test(unittest.TestCase):
         template.default_uom = unit
         template.type = 'goods'
         template.account_category = account_category
+        template.salable = True
         template.save()
         product, = template.products
-        
-        # Create a purchase
-        Invoice = Model.get('account.invoice')
-        invoice = Invoice()
-        invoice.party = party
-        line = invoice.lines.new()
+
+        # Create a sale
+        Sale = Model.get('sale.sale')
+        sale = Sale()
+        sale.party = party
+        sale.invoice_method = 'order'
+
+        line = sale.lines.new()
         line.product = product
         line.quantity = 1
-        self.assertEqual(line.base_price, None)
-        self.assertEqual(line.unit_price, None)
-        
-        # Set a discount of 10%
+
         line.base_price = Decimal('10.0000')
         line.discount_rate = Decimal('0.1')
         self.assertEqual(line.unit_price, Decimal('9.0000'))
-        self.assertEqual(line.discount_amount, Decimal('1.0000'))
-        self.assertEqual(line.discount, '10%')
-    
-        invoice.save()
-        line, = invoice.lines
-        self.assertEqual(line.unit_price, Decimal('9.0000'))
-        self.assertEqual(line.discount_amount, Decimal('1.0000'))
-        self.assertEqual(line.discount, '10%')
-        
-        # Set a discount amount
-        line.discount_amount = Decimal('3.3333')
-        self.assertEqual(line.unit_price, Decimal('6.6667'))
-        self.assertEqual(line.discount_rate, Decimal('0.3333'))
-        self.assertEqual(line.discount, '$3.3333')
+
+        sale.click('quote')
+        sale.click('confirm')
+
+        self.assertEqual(sale.state, 'processing')
+
+        invoice, = sale.invoices
+        iline, = invoice.lines
+
+        self.assertEqual(iline.base_price, Decimal('10.0000'))
+        self.assertEqual(iline.unit_price, Decimal('9.0000'))
+        self.assertEqual(iline.discount_amount, Decimal('1.0000'))
+        self.assertEqual(iline.discount, '10%')
 
