@@ -4,9 +4,18 @@ from proteus import Model
 from trytond.modules.company.tests.tools import create_company, get_company
 from trytond.modules.account.tests.tools import create_chart, get_accounts
 from trytond.tests.tools import activate_modules
+from trytond.tests.test_tryton import drop_db
 
 
 class Test(unittest.TestCase):
+    def setUp(self):
+        drop_db()
+        super().setUp()
+
+    def tearDown(self):
+        drop_db()
+        super().tearDown()
+
     def test_account_invoice_discount(self):
         activate_modules('account_invoice_discount')
         
