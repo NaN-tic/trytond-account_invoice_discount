@@ -50,7 +50,7 @@ class InvoiceLine(metaclass=PoolMeta):
     def __register__(cls, module_name):
         # Rename gross_unit_price to base_price
         table = cls.__table_handler__(module_name)
-        if table.column_exist('gross_unit_price') and not table.column_exist('base_price'):  
+        if table.column_exist('gross_unit_price') and not table.column_exist('base_price'):
             table.column_rename('gross_unit_price', 'base_price')
         super().__register__(module_name)
 
@@ -124,6 +124,12 @@ class InvoiceLine(metaclass=PoolMeta):
                     amount, self.invoice.currency, digits=price_digits[1])
         else:
             return lang.format('%i', rate * 100) + '%'
+
+    def _credit(self):
+        line = super()._credit()
+        if self.base_price is not None:
+            line.base_price = self.base_price
+        return line
 
     @classmethod
     def view_attributes(cls):
