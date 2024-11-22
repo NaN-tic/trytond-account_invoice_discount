@@ -11,14 +11,14 @@ class Test(unittest.TestCase):
     def setUp(self):
         drop_db()
         super().setUp()
-        
+
     def tearDown(self):
         drop_db()
         super().tearDown()
 
     def test_account_invoice_discount(self):
         activate_modules(['purchase_discount', 'account_invoice_discount'])
-        
+
         create_company()
         company = get_company()
 
@@ -26,12 +26,12 @@ class Test(unittest.TestCase):
         accounts = get_accounts(company)
         revenue = accounts['revenue']
         expense = accounts['expense']
-        
+
         # Create parties
         Party = Model.get('party.party')
         party = Party(name="Party")
         party.save()
-        
+
         # Create product
         ProductCategory = Model.get('product.category')
         account_category = ProductCategory(name="Account Category")
@@ -44,7 +44,7 @@ class Test(unittest.TestCase):
         unit, = ProductUom.find([('name', '=', 'Unit')])
 
         ProductTemplate = Model.get('product.template')
-        
+
         template = ProductTemplate()
         template.name = 'product'
         template.default_uom = unit

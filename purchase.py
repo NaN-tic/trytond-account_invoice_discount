@@ -9,5 +9,5 @@ class PurchaseLine(metaclass=PoolMeta):
         for line in lines:
             line.base_price = self.base_price
         return lines
-            
+
 
