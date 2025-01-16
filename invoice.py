@@ -108,8 +108,7 @@ class InvoiceLine(metaclass=PoolMeta):
     def set_discount_amount(cls, lines, name, value):
         pass
 
-    @fields.depends(
-        'invoice', '_parent_invoice.currency',
+    @fields.depends('invoice', 'currency', '_parent_invoice.currency',
         methods=[
             'on_change_with_discount_rate', 'on_change_with_discount_amount'])
     def on_change_with_discount(self, name=None):
@@ -119,6 +118,7 @@ class InvoiceLine(metaclass=PoolMeta):
         rate = self.on_change_with_discount_rate()
         if not rate or rate % Decimal('0.01'):
             amount = self.on_change_with_discount_amount()
+            currency = self.invoice and self.invoice.currency or self.currency
             if amount:
                 return lang.currency(
                     amount, self.invoice.currency, digits=price_digits[1])
