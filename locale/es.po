@@ -2,15 +2,23 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=utf-8\n"
 
+msgctxt "field:account.invoice.line,base_price:"
+msgid "Base Price"
+msgstr "Precio base"
+
 msgctxt "field:account.invoice.line,discount:"
 msgid "Discount"
 msgstr "Descuento"
 
-msgctxt "field:account.invoice.line,gross_unit_price:"
-msgid "Gross Price"
-msgstr "Precio bruto"
+msgctxt "field:account.invoice.line,discount_amount:"
+msgid "Discount Amount"
+msgstr "Importe descuento"
 
-msgctxt "model:ir.action,name:report_invoice"
+msgctxt "field:account.invoice.line,discount_rate:"
+msgid "Discount Rate"
+msgstr "% Descuento"
+
+msgctxt "model:ir.action,name:"
 msgid "Invoice"
 msgstr "Factura"
 
@@ -21,3 +29,7 @@ msgstr "Descuento"
 msgctxt "view:account.invoice.line:"
 msgid "%"
 msgstr "%"
+
+msgctxt "view:account.invoice.line:"
+msgid "Discount"
+msgstr "Descuento"
