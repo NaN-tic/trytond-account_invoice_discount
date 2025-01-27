@@ -120,8 +120,7 @@ class InvoiceLine(metaclass=PoolMeta):
             amount = self.on_change_with_discount_amount()
             currency = self.invoice and self.invoice.currency or self.currency
             if amount:
-                return lang.currency(
-                    amount, self.invoice.currency, digits=price_digits[1])
+                return lang.currency(amount, currency, digits=price_digits[1])
         else:
             return lang.format('%i', rate * 100) + '%'
 
