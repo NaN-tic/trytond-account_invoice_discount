@@ -92,7 +92,8 @@ class InvoiceLine(metaclass=PoolMeta):
             super().on_change_quantity()
         except:
             pass
-        self.gross_unit_price = self.unit_price
+        if not self.gross_unit_price:
+            self.gross_unit_price = self.unit_price
         if not self.discount:
             self.discount = Decimal(0)
         if self.unit_price is not None:
