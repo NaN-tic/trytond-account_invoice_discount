@@ -79,7 +79,8 @@ class InvoiceLine(metaclass=PoolMeta):
     @fields.depends('unit_price', 'discount', methods=['update_prices'])
     def on_change_product(self):
         super().on_change_product()
-        self.gross_unit_price = self.unit_price
+        if not self.gross_unit_price:
+            self.gross_unit_price = self.unit_price
         if not self.discount:
             self.discount = Decimal(0)
 
