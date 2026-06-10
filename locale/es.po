@@ -27,7 +27,7 @@ msgid "Amount"
 msgstr "Importe"
 
 msgctxt "selection:company.company,discount_format:"
-msgid "None"
+msgid "Default"
 msgstr "Por defecto"
 
 msgctxt "selection:company.company,discount_format:"

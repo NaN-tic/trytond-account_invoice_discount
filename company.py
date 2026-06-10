@@ -8,7 +8,7 @@ class Company(metaclass=PoolMeta):
     __name__ = 'company.company'
 
     discount_format = fields.Selection([
-            (None, "None"),
+            (None, "Default"),
             ('percentage', "Percentage"),
             ('amount', "Amount"),
             ], "Discount Format", sort=False)
