@@ -119,3 +119,9 @@ class Test(unittest.TestCase):
         credit_line, = credit_invoice.lines
         self.assertEqual(line.base_price, credit_line.base_price)
         self.assertEqual(line.unit_price, credit_line.unit_price)
+
+        company.discount_format = 'amount'
+        company.save()
+
+        line.reload()
+        self.assertEqual(line.discount, '$1.0000')
