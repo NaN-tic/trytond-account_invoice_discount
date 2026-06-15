@@ -6,6 +6,7 @@ from trytond.pool import Pool, PoolMeta
 from trytond.pyson import Eval
 from trytond.modules.currency.fields import Monetary
 from trytond.modules.product import price_digits, round_price
+from .discount import DiscountFormatMixin
 
 STATES = {
     'invisible': Eval('type') != 'line',
@@ -14,7 +15,7 @@ STATES = {
     }
 
 
-class InvoiceLine(metaclass=PoolMeta):
+class InvoiceLine(DiscountFormatMixin, metaclass=PoolMeta):
     __name__ = 'account.invoice.line'
 
     base_price = Monetary(
@@ -108,21 +109,29 @@ class InvoiceLine(metaclass=PoolMeta):
     def set_discount_amount(cls, lines, name, value):
         pass
 
-    @fields.depends('invoice', 'currency', '_parent_invoice.currency',
-        methods=[
-            'on_change_with_discount_rate', 'on_change_with_discount_amount'])
+    @fields.depends(
+        'invoice', 'currency',
+        '_parent_invoice.company', '_parent_invoice.currency',
+        methods=['on_change_with_discount_rate',
+            'on_change_with_discount_amount'])
     def on_change_with_discount(self, name=None):
         pool = Pool()
         Lang = pool.get('ir.lang')
         lang = Lang.get()
+        company = self.invoice and self.invoice.company
+        discount_format = company and company.discount_format
         rate = self.on_change_with_discount_rate()
+        amount = self.on_change_with_discount_amount()
+        currency = self.invoice and self.invoice.currency or self.currency
+        if discount_format == 'percentage':
+            return (self.format_discount_percentage(lang, rate)
+                if rate else
+                self.format_discount_amount(lang, amount, currency))
+        if discount_format == 'amount':
+            return self.format_discount_amount(lang, amount, currency)
         if not rate or rate % Decimal('0.01'):
-            amount = self.on_change_with_discount_amount()
-            currency = self.invoice and self.invoice.currency or self.currency
-            if amount and currency:
-                return lang.currency(amount, currency, digits=price_digits[1])
-        else:
-            return lang.format('%i', rate * 100) + '%'
+            return self.format_discount_amount(lang, amount, currency)
+        return lang.format('%i', rate * 100) + '%'
 
     def _credit(self):
         line = super()._credit()
