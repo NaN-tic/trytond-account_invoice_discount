@@ -6,6 +6,10 @@ msgctxt "field:account.invoice.line,base_price:"
 msgid "Base Price"
 msgstr "Precio base"
 
+msgctxt "field:company.company,discount_format:"
+msgid "Discount Format"
+msgstr "Formato del descuento"
+
 msgctxt "field:account.invoice.line,discount:"
 msgid "Discount"
 msgstr "Descuento"
@@ -17,6 +21,18 @@ msgstr "Importe descuento"
 msgctxt "field:account.invoice.line,discount_rate:"
 msgid "Discount Rate"
 msgstr "% Descuento"
+
+msgctxt "selection:company.company,discount_format:"
+msgid "Amount"
+msgstr "Importe"
+
+msgctxt "selection:company.company,discount_format:"
+msgid "Default"
+msgstr "Por defecto"
+
+msgctxt "selection:company.company,discount_format:"
+msgid "Percentage"
+msgstr "Porcentaje"
 
 msgctxt "model:ir.action,name:"
 msgid "Invoice"
@@ -31,5 +47,9 @@ msgid "%"
 msgstr "%"
 
 msgctxt "view:account.invoice.line:"
+msgid "Discount"
+msgstr "Descuento"
+
+msgctxt "view:company.company:"
 msgid "Discount"
 msgstr "Descuento"
