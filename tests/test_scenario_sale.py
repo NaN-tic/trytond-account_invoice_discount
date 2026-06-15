@@ -81,3 +81,10 @@ class Test(unittest.TestCase):
         self.assertEqual(iline.discount_amount, Decimal('1.0000'))
         self.assertEqual(iline.discount, '10%')
 
+        company.discount_format = 'amount'
+        company.save()
+
+        line, = sale.lines
+        self.assertEqual(line.discount, '$1.0000')
+        iline.reload()
+        self.assertEqual(iline.discount, '$1.0000')
